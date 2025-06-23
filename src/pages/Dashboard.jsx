@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Navbar from "@/components/layouts/Navbar";
 import {
   BarChart,
   Bar,
@@ -37,41 +38,22 @@ const data = [
   { name: "Dec", value: 32000 },
 ];
 
+import { useDashboardData } from "@/hooks/useDashboardData";
+
 const DashboardPage = () => {
   const [filter, setFilter] = useState("today");
+  const { data, loading } = useDashboardData();
+
+const { totalConversations, totalInteractions, totalUsers, userMessages, chartData } = data;
+
+
+  if (loading) return <p className="p-6">Loading...</p>;
 
   return (
     <div className="">
-      {/* Header */}
-      <div className="flex flex-wrap justify-between items-center gap-4 outline-1 py-4  px-7">
-        <h1 className="text-lg font-medium">
-          Dashboard - Your Companions at Work
-        </h1>
-
-        <div className="flex items-center gap-4">
-          <Menubar>
-            <MenubarMenu>
-              <MenubarTrigger>...</MenubarTrigger>
-              <MenubarContent>
-                <MenubarItem>
-                  Configure Companion <MenubarShortcut>⌘T</MenubarShortcut>
-                </MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem>Upgrade Plan</MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
-          </Menubar>
-
-          <Button>Reports</Button>
-
-          <Avatar>
-            <AvatarImage src="/avatar.jpg" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-        </div>
-      </div>
-
+      <Navbar />
       <div className="p-6 space-y-6">
+        {/* Filter Toggle + Search */}
         <div className="flex items-center justify-between">
           <ToggleGroup
             type="single"
@@ -86,44 +68,33 @@ const DashboardPage = () => {
           <Input type="search" placeholder="Search..." className="w-48" />
         </div>
 
-        {/* Stats Cards */}
+        {/* Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Total Conversations</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Total Conversations</CardTitle></CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">$45,678.90</p>
-              <p className="text-sm text-green-600">+20% month over month</p>
+              <p className="text-2xl font-bold">{totalConversations}</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle>Total Interactions</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Total Interactions</CardTitle></CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">2,405</p>
-              <p className="text-sm text-green-600">+33% month over month</p>
+              <p className="text-2xl font-bold">{totalInteractions}</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle>Users Identified</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Users Identified</CardTitle></CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">10,353</p>
-              <p className="text-sm text-red-500">-8% month over month</p>
+              <p className="text-2xl font-bold">{totalUsers}</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Table + Chart */}
+        {/* Table & Chart */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Table */}
           <Card>
-            <CardHeader>
-              <CardTitle>Latest 10 Conversations</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Latest 10 Conversations</CardTitle></CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
@@ -131,23 +102,15 @@ const DashboardPage = () => {
                     <tr>
                       <th className="py-2">User's Inquiry</th>
                       <th>Date & Time</th>
-                      <th>Source</th>
+                      <th>Session ID</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { inquiry: "website.net", date: "4321", source: "+84%" },
-                      { inquiry: "website.net", date: "4033", source: "-8%" },
-                      { inquiry: "website.net", date: "3128", source: "+2%" },
-                      { inquiry: "website.net", date: "2104", source: "+33%" },
-                      { inquiry: "website.net", date: "2003", source: "+30%" },
-                      { inquiry: "website.net", date: "1894", source: "+15%" },
-                      { inquiry: "website.net", date: "405", source: "-12%" },
-                    ].map((row, i) => (
+                    {[...userMessages].map((msg, i) => (
                       <tr key={i} className="border-b">
-                        <td className="py-2">{row.inquiry}</td>
-                        <td>{row.date}</td>
-                        <td>{row.source}</td>
+                        <td className="py-2">{msg.user_msg}</td>
+                        <td>{msg.timestamp}</td>
+                        <td>{msg.session_id}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -158,12 +121,10 @@ const DashboardPage = () => {
 
           {/* Chart */}
           <Card>
-            <CardHeader>
-              <CardTitle>Conversations Trend</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Conversations Trend</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data}>
+                <BarChart data={chartData}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />

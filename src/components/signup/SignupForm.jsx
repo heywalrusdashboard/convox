@@ -4,8 +4,10 @@ import Step1 from "./steps/Step1";
 import Step2 from "./steps/Step2";
 import Step3 from "./steps/Step3";
 import jwtEncode from "jwt-encode";
+import { useNavigate } from "react-router-dom";
 
 const SignupForm = ({ step, setStep }) => {
+  const navigate = useNavigate();
   const form = useForm({
     defaultValues: {
       companyName: "",
@@ -35,31 +37,74 @@ const SignupForm = ({ step, setStep }) => {
   const secret = import.meta.env.VITE_JWT_SECRET;
   const onBack = () => setStep((prev) => Math.max(prev - 1, 1));
   const onSubmit = async (data) => {
-    try {
-      const token = jwtEncode(data, secret, { alg: "HS256" });
-      const response = await fetch(
-        "https://walrus.kalavishva.com/webhook/walrus_convox_signup",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(data),
-        }
-      );
-      if (response.ok) {
-        window.location.href =
-          "https://dashboard.heywalrus.in/app/convox-v1-0/login-682603059ec32534dc791ebd";
-      } else {
-        const errorData = await response.json();
-        alert(`Signup failed: ${errorData.message || "Unknown error"}`);
+  try {
+    const token = jwtEncode(data, secret, { alg: "HS256" });
+
+    // Signup request
+    const signupRes = await fetch(
+      "https://walrus.kalavishva.com/webhook/walrus_convox_signup",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
       }
-    } catch (err) {
-      console.error("Signup error:", err);
-      alert("An error occurred during signup.");
+    );
+
+    if (!signupRes.ok) {
+      const errorData = await signupRes.json();
+      alert(`Signup failed: ${errorData.message || "Unknown error"}`);
+      return;
     }
-  };
+
+    // Auto-login
+    const tokenData ={
+      email:data.email,
+      password:data.password,
+    }
+    const loginToken = jwtEncode(data, "walrus", { alg: "HS256" });
+    const loginRes = await fetch(
+      "https://walrus.kalavishva.com/webhook/loginv2",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${loginToken}`,
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+      }
+    );
+
+    const loginData = await loginRes.json();
+
+    if (loginRes.ok && loginData.length > 0) {
+      const {
+        User_id, // exclude
+        ...restData
+      } = loginData[0];
+
+      // Store token separately (also inside restData but good for easy access)
+      localStorage.setItem("token", restData.jwt_token);
+
+      // Store companion/user context
+      localStorage.setItem("userDetails", JSON.stringify(restData));
+
+      navigate("/configureCompanion");
+    } else {
+      alert("Signup succeeded, but login failed.");
+    }
+  } catch (err) {
+    console.error("Signup/Login error:", err);
+    alert("An error occurred during signup.");
+  }
+};
+
+
 
   return (
     <Form {...form}>
