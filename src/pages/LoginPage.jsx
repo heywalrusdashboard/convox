@@ -18,7 +18,8 @@ function LoginPage() {
       const tokenData ={
       user_id:email
     }
-      const token = jwtEncode(tokenData, "walrus", { alg: "HS256" });
+      const secret = import.meta.env.VITE_JWT_SECRET;
+      const token = jwtEncode(tokenData, secret, { alg: "HS256" });
       const res = await fetch("https://walrus.kalavishva.com/webhook/loginv2", {
         method: "POST",
         headers: {

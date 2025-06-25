@@ -16,7 +16,6 @@ const ProtectedRoute = ({ children }) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log("Response status:", res.status);
         if (res.ok) {
           setAuthValid(true);
         } else {

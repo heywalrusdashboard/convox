@@ -29,7 +29,6 @@ export const useDashboardData = () => {
     const fetchDashboard = async () => {
       try {
         const token = localStorage.getItem("token");
-        console.log("Token from localStorage:", token);
         if (!token) {
           console.error("No token found in localStorage");
           return;
@@ -58,8 +57,6 @@ export const useDashboardData = () => {
         const last10 = [...item.user_messages]
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // sort descending
           .slice(0, 10);
-          
-        console.log(last10);// latest 10 only
 
         setData({
           totalConversations: item.totalConversations,

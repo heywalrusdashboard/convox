@@ -38,8 +38,6 @@ const SignupForm = ({ step, setStep }) => {
   const onBack = () => setStep((prev) => Math.max(prev - 1, 1));
   const onSubmit = async (data) => {
   try {
-    const token = jwtEncode(data, secret, { alg: "HS256" });
-
     // Signup request
     const signupRes = await fetch(
       "https://walrus.kalavishva.com/webhook/walrus_convox_signup",
@@ -47,7 +45,6 @@ const SignupForm = ({ step, setStep }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       }
@@ -64,7 +61,7 @@ const SignupForm = ({ step, setStep }) => {
       email:data.email,
       password:data.password,
     }
-    const loginToken = jwtEncode(data, "walrus", { alg: "HS256" });
+    const loginToken = jwtEncode(data,secret, { alg: "HS256" });
     const loginRes = await fetch(
       "https://walrus.kalavishva.com/webhook/loginv2",
       {
