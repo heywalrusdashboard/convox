@@ -16,8 +16,7 @@ function LoginPage() {
     setLoading(true);
     try {
       const tokenData ={
-      email:email,
-      passowrd:password,
+      user_id:email
     }
       const token = jwtEncode(tokenData, "walrus", { alg: "HS256" });
       const res = await fetch("https://walrus.kalavishva.com/webhook/loginv2", {
@@ -30,8 +29,9 @@ function LoginPage() {
       });
 
       const data = await res.json();
+      // console.log("Login response:", data);
       if (res.ok && data.length > 0) {
-        localStorage.setItem("token", data[0].jwt_token);
+        localStorage.setItem("token", data[0].jwt_token.replace('Bearer ', ''));
         localStorage.setItem("userDetails", JSON.stringify(data[0]));
 
         navigate("/");

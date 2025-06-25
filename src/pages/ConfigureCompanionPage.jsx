@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 
 export default function ConfigureCompanionPage() {
+  const [userPlan, setUserPlan] = useState("");
   const [files, setFiles] = useState([]);
   const [previewURL, setPreviewURL] = useState("");
   const [embedCode, setEmbedCode] = useState("");
@@ -40,15 +41,29 @@ export default function ConfigureCompanionPage() {
 
   const fontOptions = ["Inter", "Roboto", "Poppins", "Open Sans", "sans-serif"];
   useEffect(() => {
-  const storedValues = {
-    name: userDetails.companion_name || "",
-    instructions: userDetails.companion_persona, // optionally load saved instructions if available
-    primaryColor: userDetails.primary_colour || "#000000",
-    secondaryColor: userDetails.secondary_colour || "#ffffff",
-    fontFamily: userDetails.font_family || "sans-serif",
-  };
-  fetchPreviewAndEmbed(storedValues);
-}, []);
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("https://walrus.kalavishva.com/webhook/user_account", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        const plan = res[0]?.user_plan || "";
+        setUserPlan(plan);
+      })
+      .catch((err) => console.error("Failed to fetch plan info", err));
+    const storedValues = {
+      name: userDetails.companion_name || "",
+      instructions: userDetails.companion_persona, 
+      primaryColor: userDetails.primary_colour || "#000000",
+      secondaryColor: userDetails.secondary_colour || "#ffffff",
+      fontFamily: userDetails.font_family || "sans-serif",
+    };
+    fetchPreviewAndEmbed(storedValues);
+  }, []);
   const fetchPreviewAndEmbed = async (values) => {
     try {
       const payload = {
@@ -58,7 +73,6 @@ export default function ConfigureCompanionPage() {
         companionName: values.name,
         fontFamily: values.fontFamily,
       };
-
 
       // 🔹 Fetch raw HTML for preview
       const widgetRes = await fetch(
@@ -97,24 +111,59 @@ export default function ConfigureCompanionPage() {
   };
 
   const onSubmit = async (values) => {
-  const updatedData = {
-    ...userDetails,
-    companion_name: values.name,
-    primary_colour: values.primaryColor,
-    secondary_colour: values.secondaryColor,
-    font_family: values.fontFamily,
-  };
-  localStorage.setItem("userDetails", JSON.stringify(updatedData));
-  toast("Companion settings saved!"); // ✅ fixed
-  await fetchPreviewAndEmbed(values);
-};
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You are not authenticated");
+      return;
+    }
 
+    const payload = {
+      user_id: userDetails.User_id,
+      companion_name: values.name,
+      primary_colour: values.primaryColor,
+      secondary_colour: values.secondaryColor,
+      font_family: values.fontFamily,
+    };
+
+    if (userPlan) {
+      payload.companion_persona = values.instructions;
+    }
+
+    try {
+      const res = await fetch(
+        "https://walrus.kalavishva.com/webhook/update_companion",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to update companion config");
+      }
+      const updatedData = {
+        ...userDetails,
+        ...payload,
+      };
+      localStorage.setItem("userDetails", JSON.stringify(updatedData));
+
+      // 🔸 Regenerate preview and code
+      await fetchPreviewAndEmbed(values);
+      toast.success("Companion settings updated successfully!");
+    } catch (error) {
+      console.error("Error saving companion config:", error);
+      toast.error("Failed to save companion settings.");
+    }
+  };
 
   const copyToClipboard = () => {
-  navigator.clipboard.writeText(embedCode);
-  toast("Code copied to clipboard!"); // ✅ fixed
-};
-
+    navigator.clipboard.writeText(embedCode);
+    toast("Code copied to clipboard!");
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -147,17 +196,26 @@ export default function ConfigureCompanionPage() {
             <FormField
               control={form.control}
               name="instructions"
-              rules={{ required: "Instructions are required" }}
+              rules={userPlan ? { required: "Persona is required" } : {}}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Instructions</FormLabel>
+                  <FormLabel>Persona</FormLabel>
                   <FormControl>
                     <Textarea
                       rows={4}
                       placeholder="How should the companion behave?"
                       {...field}
+                      readOnly={!userPlan}
+                      className={
+                        !userPlan ? "bg-gray-100 cursor-not-allowed" : ""
+                      }
                     />
                   </FormControl>
+                  {!userPlan && (
+                    <p className="text-xs text-gray-500">
+                      Upgrade your plan to customize the companion's persona.
+                    </p>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -169,22 +227,32 @@ export default function ConfigureCompanionPage() {
                 Knowledge (upload files)
               </label>
               <div
-                className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-black"
-                onClick={() => document.getElementById("file-input").click()}
+                className={`border-2 border-dashed rounded-md p-4 text-center 
+    ${
+      !userPlan
+        ? "border-gray-200 bg-gray-50 cursor-not-allowed"
+        : "hover:border-black border-gray-300"
+    }`}
+                onClick={() =>
+                  userPlan && document.getElementById("file-input").click()
+                }
               >
                 <input
                   id="file-input"
                   type="file"
                   multiple
                   className="hidden"
+                  disabled={!userPlan}
                   onChange={(e) =>
                     setFiles((prev) => [...prev, ...Array.from(e.target.files)])
                   }
                 />
                 <p className="text-gray-500">
-                  Click or drag files here to upload
+                  {userPlan
+                    ? "Click or drag files here to upload"
+                    : "Upgrade your plan to upload knowledge files"}
                 </p>
-                {files.length > 0 && (
+                {userPlan && files.length > 0 && (
                   <ul className="mt-2 text-sm">
                     {files.map((f, i) => (
                       <li key={i}>{f.name}</li>
