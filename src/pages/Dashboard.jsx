@@ -48,7 +48,7 @@ const DashboardPage = () => {
 const { totalConversations, totalInteractions, totalUsers, userMessages, chartData } = data;
 
 
-  if (loading) return <Loader/>;
+  if (loading) return <div className=" h-screen w-screen flex justify-center items-center"><Loader/></div>;
 
   return (
     <div className="">

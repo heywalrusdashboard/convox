@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Loader from "../ui/loader";
 
 const ProtectedRoute = ({ children }) => {
   const [authValid, setAuthValid] = useState(null);
@@ -30,7 +31,7 @@ const ProtectedRoute = ({ children }) => {
     validateToken();
   }, []);
 
-  if (authValid === null) return <div className="p-6">Verifying session...</div>;
+  if (authValid === null) return <div className=" h-screen w-screen flex justify-center items-center"><Loader/></div>;
   if (authValid === false) return <Navigate to="/login" replace />;
   return children;
 };
