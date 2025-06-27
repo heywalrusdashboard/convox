@@ -13,14 +13,16 @@ const Step2 = ({ form }) => (
     <FormField
       control={form.control}
       name="companionGoal"
-      rules={{ required: "Companion goal is required" }}
       render={({ field }) => (
         <FormItem>
           <FormLabel>Your Companion Goal</FormLabel>
           <FormControl>
-            <Input placeholder="Converse with the users and understand their requirements" {...field} />
+            <Input
+              {...field}
+              readOnly
+              className="bg-gray-100 cursor-not-allowed"
+            />
           </FormControl>
-          <FormMessage />
         </FormItem>
       )}
     />
@@ -32,7 +34,10 @@ const Step2 = ({ form }) => (
         <FormItem>
           <FormLabel>Your Companion Persona</FormLabel>
           <FormControl>
-            <Textarea placeholder="You are Lucy, a companion for Walrus..." {...field} />
+            <Textarea
+              placeholder="You are Lucy, a companion for Walrus..."
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

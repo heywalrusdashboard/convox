@@ -36,8 +36,8 @@ const Step3 = ({ form }) => (
       rules={{
         required: "Mobile number is required",
         pattern: {
-          value: /^\+\d{10,15}$/,
-          message: "Enter a valid mobile number with country code",
+          value: /^\d{10,}$/,
+          message: "Enter a valid mobile number with at least 10 digits",
         },
       }}
       render={({ field }) => (

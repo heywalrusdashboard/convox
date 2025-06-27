@@ -27,11 +27,15 @@ export default function ConfigureCompanionPage() {
   const [previewURL, setPreviewURL] = useState("");
   const [embedCode, setEmbedCode] = useState("");
   const userDetails = JSON.parse(localStorage.getItem("userDetails")) || {};
+  const [saving, setSaving] = useState(false);
 
   const form = useForm({
     defaultValues: {
       name: userDetails.companion_name || "",
       instructions: userDetails.companion_persona || "",
+      companionGoal:
+        userDetails.companion_goal ||
+        "Conversation Scout - Capture inquiries from the users",
       primaryColor: userDetails.primary_colour || "#000000",
       secondaryColor: userDetails.secondary_colour || "#ffffff",
       fontFamily: userDetails.font_family || "sans-serif",
@@ -57,7 +61,7 @@ export default function ConfigureCompanionPage() {
       .catch((err) => console.error("Failed to fetch plan info", err));
     const storedValues = {
       name: userDetails.companion_name || "",
-      instructions: userDetails.companion_persona, 
+      instructions: userDetails.companion_persona,
       primaryColor: userDetails.primary_colour || "#000000",
       secondaryColor: userDetails.secondary_colour || "#ffffff",
       fontFamily: userDetails.font_family || "sans-serif",
@@ -74,7 +78,7 @@ export default function ConfigureCompanionPage() {
         fontFamily: values.fontFamily,
       };
 
-      // 🔹 Fetch raw HTML for preview
+      // Fetch raw HTML for preview
       const widgetRes = await fetch(
         "https://walrus.kalavishva.com/webhook/widget-script",
         {
@@ -91,7 +95,7 @@ export default function ConfigureCompanionPage() {
       const blobUrl = URL.createObjectURL(blob);
       setPreviewURL(blobUrl);
 
-      // 🔹 Fetch <script> for embed
+      // Fetch <script> for embed
       const scriptRes = await fetch(
         "https://walrus.kalavishva.com/webhook/generate-widget",
         {
@@ -116,17 +120,18 @@ export default function ConfigureCompanionPage() {
       toast.error("You are not authenticated");
       return;
     }
-
+    setSaving(true);
     const payload = {
       user_id: userDetails.User_id,
       companion_name: values.name,
       primary_colour: values.primaryColor,
       secondary_colour: values.secondaryColor,
       font_family: values.fontFamily,
+      companion_persona: values.instructions,
     };
 
     if (userPlan) {
-      payload.companion_persona = values.instructions;
+      payload.companion_goal = values.companionGoal;
     }
 
     try {
@@ -157,6 +162,8 @@ export default function ConfigureCompanionPage() {
     } catch (error) {
       console.error("Error saving companion config:", error);
       toast.error("Failed to save companion settings.");
+    } finally {
+      setSaving(false); // 🔹 END loading
     }
   };
 
@@ -191,19 +198,17 @@ export default function ConfigureCompanionPage() {
                 </FormItem>
               )}
             />
-
-            {/* Instructions */}
+            {/* Goal (fixed for free, editable for premium) */}
             <FormField
               control={form.control}
-              name="instructions"
-              rules={userPlan ? { required: "Persona is required" } : {}}
+              name="companionGoal"
+              rules={userPlan ? { required: "Goal is required" } : {}}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Persona</FormLabel>
+                  <FormLabel>Companion Goal</FormLabel>
                   <FormControl>
                     <Textarea
-                      rows={4}
-                      placeholder="How should the companion behave?"
+                      rows={3}
                       {...field}
                       readOnly={!userPlan}
                       className={
@@ -213,9 +218,29 @@ export default function ConfigureCompanionPage() {
                   </FormControl>
                   {!userPlan && (
                     <p className="text-xs text-gray-500">
-                      Upgrade your plan to customize the companion's persona.
+                      Upgrade your plan to customize the companion's goal.
                     </p>
                   )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Instructions */}
+            <FormField
+              control={form.control}
+              name="instructions"
+              rules={{ required: "Persona is required" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Persona</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      rows={4}
+                      placeholder="How should the companion behave?"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -318,43 +343,71 @@ export default function ConfigureCompanionPage() {
               )}
             />
 
-            <Button type="submit" className="mt-4 w-full bg-black text-white">
-              Save
+            <Button
+              type="submit"
+              className="mt-4 w-full bg-black text-white"
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save"}
             </Button>
           </form>
         </Form>
 
         {/* Right: Preview + Embed */}
         <div className="w-full lg:w-1/2 space-y-6">
-          {/* Live Preview */}
-          <div className="border rounded-md overflow-hidden h-96">
-            {previewURL ? (
-              <iframe
-                src={previewURL}
-                className="w-full h-full"
-                title="Widget Preview"
-              />
-            ) : (
-              <div className="h-full flex items-center justify-center text-gray-400">
-                Preview will appear here
-              </div>
-            )}
+          {/* Preview Header */}
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Live Preview</h2>
+            <div className="border rounded-md overflow-hidden h-96">
+              {previewURL ? (
+                <iframe
+                  src={previewURL}
+                  className="w-full h-full"
+                  title="Widget Preview"
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-400">
+                  Preview will appear here
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Embed Code */}
+          {/* Embed Script Section */}
           {embedCode && (
-            <div className="bg-gray-50 border rounded-md p-4 relative">
-              <pre className="text-xs overflow-x-auto whitespace-pre-wrap">
-                {embedCode}
-              </pre>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={copyToClipboard}
-                className="absolute top-2 right-2"
-              >
-                Copy Code
-              </Button>
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Embed Script</h2>
+              <div className="bg-gray-50 border rounded-md p-4 relative">
+                <pre className="text-xs overflow-x-auto whitespace-pre-wrap">
+                  {embedCode}
+                </pre>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={copyToClipboard}
+                  className="absolute top-2 right-2"
+                >
+                  Copy Code
+                </Button>
+              </div>
+
+              {/* How to use it */}
+              <details className="mt-4 bg-gray-100 border rounded-md p-4">
+                <summary className="cursor-pointer font-medium">
+                  How to add this script to your website?
+                </summary>
+                <ul className="text-sm mt-2 list-disc ml-5 text-gray-700">
+                  <li>Copy the above embed code.</li>
+                  <li>
+                    Paste it just before the closing <code>&lt;/body&gt;</code>{" "}
+                    tag of your HTML.
+                  </li>
+                  <li>
+                    Or, insert it in your global layout if you're using
+                    frameworks like React, Next.js, Vue, etc.
+                  </li>
+                </ul>
+              </details>
             </div>
           )}
         </div>

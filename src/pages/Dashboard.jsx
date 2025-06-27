@@ -22,6 +22,7 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { Button } from "@/components/ui/button";
+import Loader from "@/components/ui/loader";
 
 const data = [
   { name: "Jan", value: 45000 },
@@ -47,7 +48,7 @@ const DashboardPage = () => {
 const { totalConversations, totalInteractions, totalUsers, userMessages, chartData } = data;
 
 
-  if (loading) return <p className="p-6">Loading...</p>;
+  if (loading) return <Loader/>;
 
   return (
     <div className="">

@@ -5,8 +5,11 @@ import Step2 from "./steps/Step2";
 import Step3 from "./steps/Step3";
 import jwtEncode from "jwt-encode";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const SignupForm = ({ step, setStep }) => {
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const form = useForm({
     defaultValues: {
@@ -14,7 +17,7 @@ const SignupForm = ({ step, setStep }) => {
       websiteURL: "",
       industry: "",
       customIndustry: "",
-      companionGoal: "",
+      companionGoal: "Conversation Scout - Capture inquiries from the users",
       companionPersona: "",
       email: "",
       mobile: "",
@@ -37,71 +40,67 @@ const SignupForm = ({ step, setStep }) => {
   const secret = import.meta.env.VITE_JWT_SECRET;
   const onBack = () => setStep((prev) => Math.max(prev - 1, 1));
   const onSubmit = async (data) => {
-  try {
-    // Signup request
-    const signupRes = await fetch(
-      "https://walrus.kalavishva.com/webhook/walrus_convox_signup",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+    setLoading(true);
+    try {
+      // Signup request
+      const signupRes = await fetch(
+        "https://walrus.kalavishva.com/webhook/walrus_convox_signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!signupRes.ok) {
+        setLoading(false);
+        const errorData = await signupRes.json();
+        alert(`Signup failed: ${errorData.message || "Unknown error"}`);
+        return;
       }
-    );
 
-    if (!signupRes.ok) {
-      const errorData = await signupRes.json();
-      alert(`Signup failed: ${errorData.message || "Unknown error"}`);
-      return;
-    }
+      // Auto-login
+      const tokenData = {
+        user_id: data.email,
+      };
+      const loginToken = jwtEncode(tokenData, secret, { alg: "HS256" });
+      const loginRes = await fetch(
+        "https://walrus.kalavishva.com/webhook/loginv2",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${loginToken}`,
+          },
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+          }),
+        }
+      );
 
-    // Auto-login
-    const tokenData ={
-      email:data.email,
-      password:data.password,
-    }
-    const loginToken = jwtEncode(data,secret, { alg: "HS256" });
-    const loginRes = await fetch(
-      "https://walrus.kalavishva.com/webhook/loginv2",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loginToken}`,
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
+      const loginData = await loginRes.json();
+
+      if (loginRes.ok && loginData.length > 0) {
+        // Store token separately (also inside restData but good for easy access)
+        localStorage.setItem(
+          "token",
+          loginData[0].jwt_token.replace("Bearer ", "")
+        );
+        // Store companion/user context
+        localStorage.setItem("userDetails", JSON.stringify(loginData[0]));
+
+        navigate("/configureCompanion");
+      } else {
+        alert("Signup succeeded, but login failed.");
       }
-    );
-
-    const loginData = await loginRes.json();
-
-    if (loginRes.ok && loginData.length > 0) {
-      const {
-        User_id, // exclude
-        ...restData
-      } = loginData[0];
-
-      // Store token separately (also inside restData but good for easy access)
-      localStorage.setItem("token", restData.jwt_token);
-
-      // Store companion/user context
-      localStorage.setItem("userDetails", JSON.stringify(restData));
-
-      navigate("/configureCompanion");
-    } else {
-      alert("Signup succeeded, but login failed.");
+    } catch (err) {
+      console.error("Signup/Login error:", err);
+      alert("An error occurred during signup.");
     }
-  } catch (err) {
-    console.error("Signup/Login error:", err);
-    alert("An error occurred during signup.");
-  }
-};
-
-
+  };
 
   return (
     <Form {...form}>
@@ -125,7 +124,12 @@ const SignupForm = ({ step, setStep }) => {
           )}
           <button
             type="button"
-            className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800"
+            className={`px-6 py-2 rounded-md text-white ${
+              loading
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-black hover:bg-gray-800"
+            }`}
+            disabled={loading}
             onClick={
               step !== 3
                 ? onNext
@@ -142,7 +146,7 @@ const SignupForm = ({ step, setStep }) => {
                   }
             }
           >
-            {step === 3 ? "Finish" : "Next"}
+            {loading ? "Signing up..." : step === 3 ? "Finish" : "Next"}
           </button>
         </div>
       </form>
