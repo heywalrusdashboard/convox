@@ -18,7 +18,7 @@ const SignupForm = ({ step, setStep }) => {
       industry: "",
       customIndustry: "",
       companionGoal: "Conversation Scout - Capture inquiries from the users",
-      companionPersona: "",
+      companionPersona: "You are Efficient & Empathetic in your response. Keep your answers precise, concise and compassionate in their tone",
       email: "",
       mobile: "",
       password: "",
