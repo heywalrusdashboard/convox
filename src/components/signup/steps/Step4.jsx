@@ -14,12 +14,20 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-
-const Step4 = ({ form, handleSave, saving, previewURL, fetchPreviewAndEmbed }) => {
+import InstallWidgetModal from "@/components/installer/InstallWidgetModal";
+import { Button } from "@/components/ui/button";
+const Step4 = ({
+  form,
+  handleSave,
+  saving,
+  previewURL,
+  fetchPreviewAndEmbed,
+}) => {
   const [userPlan, setUserPlan] = useState("");
   const [files, setFiles] = useState([]);
   const userDetails = JSON.parse(localStorage.getItem("userDetails")) || {};
   const fontOptions = ["Inter", "Roboto", "Poppins", "Open Sans", "sans-serif"];
+  const [installOpen, setInstallOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -133,7 +141,7 @@ const Step4 = ({ form, handleSave, saving, previewURL, fetchPreviewAndEmbed }) =
         <div>
           <FormLabel>Knowledge (upload files)</FormLabel>
           <div
-            className={`border-2 border-dashed rounded-md p-4 text-center 
+            className={`border-2 border-dashed rounded-md mt-2 p-4 text-center 
               ${
                 !userPlan
                   ? "border-gray-200 bg-gray-50"
@@ -169,21 +177,28 @@ const Step4 = ({ form, handleSave, saving, previewURL, fetchPreviewAndEmbed }) =
         </div>
 
         <div className="flex-col gap-3 mt-3">
-          <button
+          <Button
             type="button"
             className="px-4 py-2 w-full mb-3 bg-black text-white rounded-md"
             onClick={handleSave}
             disabled={saving}
           >
             {saving ? "Saving..." : "Save"}
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
+            className="px-4 py-2 w-full mb-3 bg-black text-white rounded-md"
+            onClick={() => setInstallOpen(true)}
+          >
+            Install
+          </Button>
+          <Button
             type="button"
             className="px-4 py-2 bg-gray-200 text-black w-full rounded-md hover:bg-gray-300"
             onClick={() => (window.location.href = "/dashboard")}
           >
             Continue
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -206,6 +221,11 @@ const Step4 = ({ form, handleSave, saving, previewURL, fetchPreviewAndEmbed }) =
           </div>
         </div>
       </div>
+      <InstallWidgetModal
+        open={installOpen}
+        onClose={() => setInstallOpen(false)}
+        userDetails={userDetails}
+      />
     </div>
   );
 };

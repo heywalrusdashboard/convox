@@ -4,6 +4,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import Navbar from "@/components/layouts/Navbar";
+import InstallWidgetModal from "@/components/installer/InstallWidgetModal";
+
 import {
   Form,
   FormField,
@@ -22,6 +24,8 @@ import {
 import { toast } from "sonner";
 
 export default function ConfigureCompanionPage() {
+  const [installOpen, setInstallOpen] = useState(false);
+
   const [userPlan, setUserPlan] = useState("");
   const [files, setFiles] = useState([]);
   const [previewURL, setPreviewURL] = useState("");
@@ -350,6 +354,13 @@ export default function ConfigureCompanionPage() {
             >
               {saving ? "Saving..." : "Save"}
             </Button>
+            <Button
+              type="button"
+              className="w-full bg-black text-white"
+              onClick={() => setInstallOpen(true)}
+            >
+              Install
+            </Button>
           </form>
         </Form>
 
@@ -376,6 +387,11 @@ export default function ConfigureCompanionPage() {
           {/* Embed Script Section */}
         </div>
       </div>
+      <InstallWidgetModal
+        open={installOpen}
+        onClose={() => setInstallOpen(false)}
+        userDetails={userDetails}
+      />
     </div>
   );
 }
