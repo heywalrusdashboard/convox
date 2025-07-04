@@ -86,7 +86,7 @@ const Step4 = ({
                   type="color"
                   value={field.value}
                   onChange={field.onChange}
-                  className="h-10 w-10 border-none"
+                  className="h-10 w-full border-none"
                 />
               </FormControl>
             </FormItem>
@@ -104,7 +104,7 @@ const Step4 = ({
                   type="color"
                   value={field.value}
                   onChange={field.onChange}
-                  className="h-10 w-10 border-none"
+                  className="h-10 w-full border-none"
                 />
               </FormControl>
             </FormItem>
@@ -176,29 +176,38 @@ const Step4 = ({
           </div>
         </div>
 
-        <div className="flex-col gap-3 mt-3">
-          <Button
-            type="button"
-            className="px-4 py-2 w-full mb-3 bg-black text-white rounded-md"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Save"}
-          </Button>
-          <Button
-            type="button"
-            className="px-4 py-2 w-full mb-3 bg-black text-white rounded-md"
-            onClick={() => setInstallOpen(true)}
-          >
-            Install
-          </Button>
-          <Button
-            type="button"
-            className="px-4 py-2 bg-gray-200 text-black w-full rounded-md hover:bg-gray-300"
-            onClick={() => (window.location.href = "/dashboard")}
-          >
-            Continue
-          </Button>
+        <div className="flex flex-col justify-end h-full">
+          {/* Save & Install */}
+          <div>
+            <div className="flex w-full gap-3">
+              <Button
+                type="button"
+                className="px-4 py-2 w-1/2 bg-black text-white rounded-md"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                type="button"
+                className="px-4 py-2 w-1/2 mb-3 bg-black text-white rounded-md"
+                onClick={() => setInstallOpen(true)}
+              >
+                Install
+              </Button>
+            </div>
+
+            {/* Stick to bottom */}
+            <div className="mt-auto pt-6">
+              <Button
+                type="button"
+                className="px-4 py-2 bg-gray-200 text-black w-full rounded-md hover:bg-gray-300"
+                onClick={() => (window.location.href = "/dashboard")}
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
