@@ -78,24 +78,7 @@ export default function ConfigureCompanionPage() {
         fontFamily: values.fontFamily,
       };
 
-      // Fetch raw HTML for preview
-      const widgetRes = await fetch(
-        "https://walrus.kalavishva.com/webhook/widget-script",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const htmlText = await widgetRes.text();
-      const blob = new Blob([htmlText], { type: "text/html" });
-      const blobUrl = URL.createObjectURL(blob);
-      setPreviewURL(blobUrl);
-
-      // Fetch <script> for embed
+      // Fetch only <script> from generate-widget
       const scriptRes = await fetch(
         "https://walrus.kalavishva.com/webhook/generate-widget",
         {
@@ -107,8 +90,23 @@ export default function ConfigureCompanionPage() {
         }
       );
 
-      const rawScript = await scriptRes.text(); // 📌 Get raw script text
-      setEmbedCode(rawScript);
+      const rawScript = await scriptRes.text();
+
+      // Inject into preview iframe
+      const htmlWrapper = `
+      <html>
+        <head><meta charset="UTF-8"><title>Widget Preview</title></head>
+        <body>
+          <div id="widget-root"></div>
+          ${rawScript}
+        </body>
+      </html>
+    `;
+
+      const blob = new Blob([htmlWrapper], { type: "text/html" });
+      const blobUrl = URL.createObjectURL(blob);
+      setPreviewURL(blobUrl);
+      setEmbedCode(rawScript); // Also update embed code
     } catch (err) {
       console.error("Failed to load preview/code:", err);
     }
@@ -290,29 +288,31 @@ export default function ConfigureCompanionPage() {
             {/* Colors */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Colors</h3>
-              {["primaryColor", "secondaryColor"].map((name) => (
-                <FormField
-                  key={name}
-                  control={form.control}
-                  name={name}
-                  render={({ field }) => (
-                    <FormItem className="flex items-center gap-4">
-                      <FormLabel className="w-40 capitalize">
-                        {name.replace("Color", " Color")}
-                      </FormLabel>
-                      <FormControl>
-                        <input
-                          type="color"
-                          value={field.value}
-                          onChange={field.onChange}
-                          className="h-10 w-10 border-none"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
+              <div className="flex flex-wrap gap-4">
+                {["primaryColor", "secondaryColor"].map((name) => (
+                  <FormField
+                    key={name}
+                    control={form.control}
+                    name={name}
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-4">
+                        <FormLabel className="w-40 capitalize">
+                          {name.replace("Color", " Color")}
+                        </FormLabel>
+                        <FormControl>
+                          <input
+                            type="color"
+                            value={field.value}
+                            onChange={field.onChange}
+                            className="h-10 w-10 border-none"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Font */}
@@ -354,11 +354,11 @@ export default function ConfigureCompanionPage() {
         </Form>
 
         {/* Right: Preview + Embed */}
-        <div className="w-full lg:w-1/2 space-y-6">
+        <div className="w-full lg:w-1/2 flex flex-col flex-1 space-y-6 h-100% ">
           {/* Preview Header */}
-          <div>
+          <div className="h-[100vh] md:h-full">
             <h2 className="text-lg font-semibold mb-2">Live Preview</h2>
-            <div className="border rounded-md overflow-hidden h-96">
+            <div className="border rounded-md overflow-scroll h-full">
               {previewURL ? (
                 <iframe
                   src={previewURL}
@@ -374,42 +374,6 @@ export default function ConfigureCompanionPage() {
           </div>
 
           {/* Embed Script Section */}
-          {embedCode && (
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Embed Script</h2>
-              <div className="bg-gray-50 border rounded-md p-4 relative">
-                <pre className="text-xs overflow-x-auto whitespace-pre-wrap">
-                  {embedCode}
-                </pre>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={copyToClipboard}
-                  className="absolute top-2 right-2"
-                >
-                  Copy Code
-                </Button>
-              </div>
-
-              {/* How to use it */}
-              <details className="mt-4 bg-gray-100 border rounded-md p-4">
-                <summary className="cursor-pointer font-medium">
-                  How to add this script to your website?
-                </summary>
-                <ul className="text-sm mt-2 list-disc ml-5 text-gray-700">
-                  <li>Copy the above embed code.</li>
-                  <li>
-                    Paste it just before the closing <code>&lt;/body&gt;</code>{" "}
-                    tag of your HTML.
-                  </li>
-                  <li>
-                    Or, insert it in your global layout if you're using
-                    frameworks like React, Next.js, Vue, etc.
-                  </li>
-                </ul>
-              </details>
-            </div>
-          )}
         </div>
       </div>
     </div>

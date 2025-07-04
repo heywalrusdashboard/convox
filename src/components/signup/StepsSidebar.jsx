@@ -4,11 +4,12 @@ const steps = [
   "About Your Business",
   "Create a Companion",
   "Create an Account",
+  "Try and Install"
 ];
 
 const StepSidebar = ({ currentStep }) => {
   return (
-    <div className="w-full lg:w-1/3 bg-gray-100 p-6 flex flex-col gap-8">
+    <div className="w-full sm:w-1/4 bg-gray-100 p-6 flex flex-col gap-8">
       <div className="flex flex-col gap-6">
         {steps.map((label, index) => {
           const stepNum = index + 1;
