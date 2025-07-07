@@ -5,6 +5,7 @@ import SignupPage from "@/pages/SignupPage";
 import Dashboard from "@/pages/Dashboard";
 import ProtectedRoute from "@/components/protected/ProtectedRoute";
 import ConfigureCompanionPage from "@/pages/ConfigureCompanionPage";
+import ReportsPage from "./pages/ReportsPage";
 
 function App() {
   return (
@@ -28,6 +29,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ConfigureCompanionPage />
+            </ProtectedRoute>
+          }
+          />
+          <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <ReportsPage/>
             </ProtectedRoute>
           }
           />

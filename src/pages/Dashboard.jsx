@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navbar from "@/components/layouts/Navbar";
 import {
   BarChart,
@@ -12,32 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useState } from "react";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
-import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/loader";
-
-const data = [
-  { name: "Jan", value: 45000 },
-  { name: "Feb", value: 55000 },
-  { name: "Mar", value: 50000 },
-  { name: "Apr", value: 63000 },
-  { name: "May", value: 78000 },
-  { name: "Jun", value: 70000 },
-  { name: "Jul", value: 64000 },
-  { name: "Aug", value: 59000 },
-  { name: "Sep", value: 54000 },
-  { name: "Oct", value: 51000 },
-  { name: "Nov", value: 48000 },
-  { name: "Dec", value: 32000 },
-];
 
 import { useDashboardData } from "@/hooks/useDashboardData";
 
@@ -45,8 +19,55 @@ const DashboardPage = () => {
   const [filter, setFilter] = useState("today");
   const { data, loading } = useDashboardData();
 
-const { totalConversations, totalInteractions, totalUsers, userMessages, chartData } = data;
+  const { totalConversations, totalInteractions, totalUsers, userMessages, chartData } = data;
 
+  // Helper to filter messages by date
+  const filterMessages = (messages) => {
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay() + 1); // Monday as start of week
+    weekStart.setHours(0,0,0,0);
+
+    return messages.filter((msg) => {
+      const msgDate = new Date(msg.timestamp);
+      const msgDateStr = msgDate.toISOString().slice(0, 10);
+      if (filter === "today") {
+        return msgDateStr === todayStr;
+      } else if (filter === "yesterday") {
+        return msgDateStr === yesterdayStr;
+      } else if (filter === "this_week") {
+        return msgDate >= weekStart && msgDate <= now;
+      }
+      return true;
+    });
+  };
+
+  const filteredMessages = filterMessages(userMessages);
+
+  // Filter chart data as well
+  const filteredChartData = chartData.filter((d) => {
+    const dDate = new Date(d.name);
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay() + 1);
+    weekStart.setHours(0,0,0,0);
+    if (filter === "today") {
+      return d.name === todayStr;
+    } else if (filter === "yesterday") {
+      return d.name === yesterdayStr;
+    } else if (filter === "this_week") {
+      return dDate >= weekStart && dDate <= now;
+    }
+    return true;
+  });
 
   if (loading) return <div className=" h-screen w-screen flex justify-center items-center"><Loader/></div>;
 
@@ -107,7 +128,7 @@ const { totalConversations, totalInteractions, totalUsers, userMessages, chartDa
                     </tr>
                   </thead>
                   <tbody>
-                    {[...userMessages].map((msg, i) => (
+                    {filteredMessages.map((msg, i) => (
                       <tr key={i} className="border-b">
                         <td className="py-2">{msg.user_msg}</td>
                         <td>{msg.timestamp}</td>
@@ -125,7 +146,7 @@ const { totalConversations, totalInteractions, totalUsers, userMessages, chartDa
             <CardHeader><CardTitle>Conversations Trend</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
+                <BarChart data={filteredChartData}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />

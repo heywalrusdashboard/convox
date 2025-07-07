@@ -4,10 +4,12 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { CopyIcon } from "lucide-react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 export default function InstallWidgetModal({ open, onClose, userDetails }) {
   const [variant, setVariant] = useState("javascript");
   const [embedCode, setEmbedCode] = useState("");
+  const [widgetInstalled, setWidgetInstalled] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -48,7 +50,7 @@ export default function InstallWidgetModal({ open, onClose, userDetails }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl">
         <DialogHeader>
-          <DialogTitle>Install Widget</DialogTitle>
+          <DialogTitle>Install</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col space-y-4">
@@ -89,6 +91,21 @@ export default function InstallWidgetModal({ open, onClose, userDetails }) {
                 <code>{embedCode}</code>
               </pre>
             </div>
+          </div>
+
+          {/* Toggle and Continue button */}
+          <div className="flex flex-col gap-4 mt-6">
+            <label className="flex items-center gap-3">
+              <Switch checked={widgetInstalled} onCheckedChange={setWidgetInstalled} />
+              <span className="text-sm">Widget installed on website</span>
+            </label>
+            <Button
+              type="button"
+              className="px-4 py-2 bg-gray-200 text-black w-full rounded-md hover:bg-gray-300"
+              onClick={() => (window.location.href = "/dashboard")}
+            >
+              Continue
+            </Button>
           </div>
         </div>
       </DialogContent>

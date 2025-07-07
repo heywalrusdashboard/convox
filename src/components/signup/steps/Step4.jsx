@@ -186,7 +186,7 @@ const Step4 = ({
                 onClick={handleSave}
                 disabled={saving}
               >
-                {saving ? "Saving..." : "Save"}
+                {saving ? "Updating..." : "Update"}
               </Button>
               <Button
                 type="button"
@@ -196,31 +196,21 @@ const Step4 = ({
                 Install
               </Button>
             </div>
-
-            {/* Stick to bottom */}
-            <div className="mt-auto pt-6">
-              <Button
-                type="button"
-                className="px-4 py-2 bg-gray-200 text-black w-full rounded-md hover:bg-gray-300"
-                onClick={() => (window.location.href = "/dashboard")}
-              >
-                Continue
-              </Button>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Right Side - Preview */}
-      <div className="lg:w-1/2 flex flex-col gap-6 lg:h-full h-screen">
-        <div className="flex-1 flex flex-col">
+      <div className="lg:w-1/2 flex flex-col gap-6 lg:h-full h-auto min-h-[750px]">
+        <div className="flex-1 flex flex-col min-h-[750px]">
           <FormLabel>Live Preview</FormLabel>
-          <div className="border rounded-md overflow-scroll flex-1 mt-2">
+          <div className="border rounded-md overflow-scroll flex-1 mt-2 min-h-[750px]">
             {previewURL ? (
               <iframe
                 src={previewURL}
-                className="w-full h-full"
+                className="w-full h-[750px] min-h-[750px] lg:h-full lg:min-h-0"
                 title="Preview"
+                style={{ minHeight: 750 }}
               />
             ) : (
               <div className="h-full flex items-center justify-center text-gray-400">
