@@ -12,8 +12,10 @@ export default function InstallWidgetModal({ open, onClose, userDetails }) {
   const [widgetInstalled, setWidgetInstalled] = useState(false);
 
   useEffect(() => {
-    if (open) {
+    if (open && variant === "javascript") {
       fetchScript();
+    } else if (variant === "react") {
+      setEmbedCode("");
     }
   }, [open, variant]);
 
@@ -66,30 +68,42 @@ export default function InstallWidgetModal({ open, onClose, userDetails }) {
 
           <div className="flex">
             {/* Instructions */}
-            <div className="space-y-4 w-1/3 text-sm text-muted-foreground">
-              <p>
-                1. Copy the code and paste it inside the <code>{`<head>`}</code> or
-                before closing <code>{`</body>`}</code>.
-              </p>
-              <p>
-                2. If using React, wrap it in a <code>useEffect</code> and inject it manually.
-              </p>
-              <p>3. Customize it anytime from the dashboard.</p>
+            <div className="space-y-4 w-1/3 text-sm text-muted-foreground flex flex-col justify-center">
+              {variant === "javascript" ? (
+                <>
+                  <p>
+                    1. Copy the code and paste it inside the <code>{`<head>`}</code> or
+                    before closing <code>{`</body>`}</code>.
+                  </p>
+                  <p>
+                    2. If using React, wrap it in a <code>useEffect</code> and inject it manually.
+                  </p>
+                  <p>3. Customize it anytime from the dashboard.</p>
+                </>
+              ) : (
+                <p className="text-center">React installation instructions coming soon!</p>
+              )}
             </div>
 
             {/* Code */}
-            <div className="relative bg-muted rounded-md p-4 overflow-auto">
-              <Button
-                size="icon"
-                variant="ghost"
-                className="absolute top-2 right-2"
-                onClick={handleCopy}
-              >
-                <CopyIcon className="h-4 w-4" />
-              </Button>
-              <pre className="text-xs whitespace-pre-wrap break-words">
-                <code>{embedCode}</code>
-              </pre>
+            <div className="relative bg-muted rounded-md p-4 overflow-auto min-h-[100px] flex items-center justify-center">
+              {variant === "javascript" ? (
+                <>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="absolute top-2 right-2"
+                    onClick={handleCopy}
+                  >
+                    <CopyIcon className="h-4 w-4" />
+                  </Button>
+                  <pre className="text-xs whitespace-pre-wrap break-words w-full">
+                    <code>{embedCode}</code>
+                  </pre>
+                </>
+              ) : (
+                <span className="text-gray-500 w-full text-center">React embed coming soon!</span>
+              )}
             </div>
           </div>
 
@@ -97,7 +111,8 @@ export default function InstallWidgetModal({ open, onClose, userDetails }) {
           <div className="flex flex-col gap-4 mt-6">
             <label className="flex items-center gap-3">
               <Switch checked={widgetInstalled} onCheckedChange={setWidgetInstalled} />
-              <span className="text-sm">Widget installed on website</span>
+              <span className="text-sm">I’ve confirmed that the companion has been installed on our Website. 
+</span>
             </label>
             <Button
               type="button"

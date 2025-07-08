@@ -132,6 +132,7 @@ const ChatWidget = () => {
 
       const data = await res.json();
       setIsTyping(false);
+      console.log("Response from server:", data);
 
       const reply = data?.[0]?.response;
       const botReply = reply?.response || "Sorry, something went wrong.";

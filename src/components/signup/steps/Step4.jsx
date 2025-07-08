@@ -57,7 +57,7 @@ const Step4 = ({
   }, []);
 
   return (
-    <div className="flex flex-col h-full w-full lg:flex-row gap-8">
+    <div className="flex flex-col w-full lg:flex-row gap-8 h-auto lg:h-full">
       {/* Left Side - Inputs */}
       <div className="lg:w-1/2 w-full flex flex-col gap-6">
         <FormField
@@ -201,19 +201,19 @@ const Step4 = ({
       </div>
 
       {/* Right Side - Preview */}
-      <div className="lg:w-1/2 flex flex-col gap-6 lg:h-full h-auto min-h-[750px]">
-        <div className="flex-1 flex flex-col min-h-[750px]">
+      <div className="lg:w-1/2 flex flex-col gap-6 h-auto lg:h-full">
+        <div className="flex-1 flex flex-col h-auto lg:h-full">
           <FormLabel>Live Preview</FormLabel>
-          <div className="border rounded-md overflow-scroll flex-1 mt-2 min-h-[750px]">
+          <div className="border rounded-md overflow-scroll flex-1 mt-2 min-h-[725px] lg:min-h-0">
             {previewURL ? (
               <iframe
                 src={previewURL}
-                className="w-full h-[750px] min-h-[750px] lg:h-full lg:min-h-0"
+                className="w-full h-full min-h-[725px] lg:min-h-0"
                 title="Preview"
-                style={{ minHeight: 750 }}
+                style={{ height: '100%' }}
               />
             ) : (
-              <div className="h-full flex items-center justify-center text-gray-400">
+              <div className="h-full flex items-center justify-center text-gray-400 min-h-[725px] lg:min-h-0">
                 Preview loading...
               </div>
             )}
