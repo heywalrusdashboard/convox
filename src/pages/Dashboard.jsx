@@ -14,10 +14,12 @@ import { useState } from "react";
 import Loader from "@/components/ui/loader";
 
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useTheme } from "@/components/ui/ThemeContext";
 
 const DashboardPage = () => {
   const [filter, setFilter] = useState("today");
   const { data, loading } = useDashboardData();
+  const { theme } = useTheme();
 
   const { totalConversations, totalInteractions, totalUsers, userMessages, chartData } = data;
 
@@ -147,10 +149,13 @@ const DashboardPage = () => {
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={filteredChartData}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#000" radius={[4, 4, 0, 0]} />
+                  <XAxis dataKey="name" stroke="var(--color-foreground)" />
+                  <YAxis stroke="var(--color-foreground)" />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--color-popover)', color: 'var(--color-popover-foreground)', border: '1px solid var(--color-border)' }}
+                    cursor={{ fill: 'var(--color-muted)' }}
+                  />
+                  <Bar dataKey="value" fill={theme === 'dark' ? '#fff' : '#000'} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

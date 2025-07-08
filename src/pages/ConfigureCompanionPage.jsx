@@ -349,14 +349,14 @@ export default function ConfigureCompanionPage() {
 
             <Button
               type="submit"
-              className="mt-4 w-full bg-black text-white"
+              className="mt-4 w-full"
               disabled={saving}
             >
               {saving ? "Saving..." : "Save"}
             </Button>
             <Button
               type="button"
-              className="w-full bg-black text-white"
+              className="w-full"
               onClick={() => setInstallOpen(true)}
             >
               Install

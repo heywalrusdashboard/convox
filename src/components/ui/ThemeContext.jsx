@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
 
   useEffect(() => {
     // Check localStorage for theme
@@ -12,8 +12,8 @@ export const ThemeProvider = ({ children }) => {
       setTheme(stored);
       document.documentElement.classList.toggle('dark', stored === 'dark');
     } else {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
+      setTheme('light');
+      document.documentElement.classList.remove('dark');
     }
   }, []);
 
