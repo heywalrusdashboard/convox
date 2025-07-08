@@ -6,6 +6,7 @@ import Dashboard from "@/pages/Dashboard";
 import ProtectedRoute from "@/components/protected/ProtectedRoute";
 import ConfigureCompanionPage from "@/pages/ConfigureCompanionPage";
 import ReportsPage from "./pages/ReportsPage";
+import ChatWidget from "./pages/ChatWidget";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/chat-widget" element={<ChatWidget/>}/>
 
         {/* Protected Route */}
         <Route

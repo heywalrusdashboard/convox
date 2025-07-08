@@ -12,7 +12,8 @@
     companionName: get("companionName", "Companion"),
   });
 
-  const widgetURL = `https://convo-x-signup.vercel.app/chat-widget?${params.toString()}`;
+  const widgetURL = `https://convox-pink.vercel.app/chat-widget?${params.toString()}`;
+  //  const widgetURL = `http://localhost:5174/chat-widget?${params.toString()}`;
 
   const wrapper = document.createElement("div");
   wrapper.style.position = "fixed";
