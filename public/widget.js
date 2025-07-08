@@ -13,7 +13,7 @@
   });
 
   const widgetURL = `https://convox-pink.vercel.app/chat-widget?${params.toString()}`;
-  //  const widgetURL = `http://localhost:5174/chat-widget?${params.toString()}`;
+  // const widgetURL = `http://localhost:5174/chat-widget?${params.toString()}`;
 
   const wrapper = document.createElement("div");
   wrapper.style.position = "fixed";
@@ -38,6 +38,21 @@
   wrapper.appendChild(iframe);
   document.body.appendChild(wrapper);
 
+  // --- Chat and Close Icons ---
+  const chatIcon = `
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="24" viewBox="0 0 24 24" width="24">
+      <path fill="#ffffff" d="M8 7H16V9H8V7Z" />
+      <path fill="#ffffff" d="M14 11H8V13H14V11Z" />
+      <path fill="#ffffff" d="M19.2 3C20.19 3 20.99 3.81 20.99 4.8L21 21L17.4 17.4H4.8C3.81 17.4 3 16.59 3 15.6V4.8C3 3.81 3.81 3 4.8 3H19.2Z" />
+    </svg>
+  `;
+
+  const closeIcon = `
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="24" width="24" viewBox="0 0 24 24">
+      <path stroke="#fff" stroke-width="2" d="M6 6L18 18M6 18L18 6" />
+    </svg>
+  `;
+
   const toggleBtn = document.createElement("div");
   toggleBtn.style.position = "fixed";
   toggleBtn.style.bottom = "20px";
@@ -53,21 +68,13 @@
   toggleBtn.style.fontSize = "24px";
   toggleBtn.style.cursor = "pointer";
   toggleBtn.style.zIndex = "9999";
-  toggleBtn.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" height="24" viewBox="0 0 24 24" width="24">
-      <path fill="#ffffff" d="M8 7H16V9H8V7Z" />
-      <path fill="#ffffff" d="M14 11H8V13H14V11Z" />
-      <path fill="#ffffff" d="M19.2 3C20.19 3 20.99 3.81 20.99 4.8L21 21L17.4 17.4H4.8C3.81 17.4 3 16.59 3 15.6V4.8C3 3.81 3.81 3 4.8 3H19.2Z" />
-    </svg>
-  `;
+  toggleBtn.innerHTML = chatIcon;
 
   let isOpen = false;
   toggleBtn.addEventListener("click", () => {
     isOpen = !isOpen;
     wrapper.style.display = isOpen ? "block" : "none";
-    toggleBtn.innerHTML = isOpen
-      ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" height="24" width="24" viewBox="0 0 24 24"><path stroke="#fff" stroke-width="2" d="M6 6L18 18M6 18L18 6" /></svg>'
-      : toggleBtn.innerHTML;
+    toggleBtn.innerHTML = isOpen ? closeIcon : chatIcon;
     iframe.contentWindow.postMessage(isOpen ? "openChat" : "closeChat", "*");
   });
 

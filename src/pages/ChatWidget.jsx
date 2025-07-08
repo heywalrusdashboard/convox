@@ -188,7 +188,7 @@ const ChatWidget = () => {
                 checked={acceptTerms}
                 onChange={() => setAcceptTerms(!acceptTerms)}
               />
-              I understand and acknowledge that {companionName} is the controller of my personal data. I understand and acknowledge that any of my personal data will be processed and transmitted in accordance with the General Data Protection Regulation (GDPR)
+              I understand that {companionName} is responsible for handling my conversation data. I agree that this data may be used and shared in line with GDPR (General Data Protection Regulation) rules.
             </label>
             <button
               onClick={startChat}
