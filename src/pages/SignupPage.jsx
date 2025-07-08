@@ -11,7 +11,7 @@ const Signup = () => {
       {/* Show heading only for steps 1–3 */}
       {step < 4 && (
         <div className="text-center max-w-xl my-20">
-          <h1 className="text-3xl font-bold">Welcome to Walrus!</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Welcome to Walrus!</h1>
           <p className="text-lg text-gray-600">
             Let's get started by telling us a bit about your business.
           </p>

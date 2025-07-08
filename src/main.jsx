@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App.jsx";
 import { Toaster } from "sonner";
 import { ProductFruits } from "react-product-fruits";
+import { ThemeProvider } from "@/components/ui/ThemeContext";
 
 const userDetails = JSON.parse(localStorage.getItem("userDetails")) || {};
 const userInfo = {
@@ -18,7 +19,7 @@ const userInfo = {
 console.log("Rendering App with userInfo:", userInfo);
 
 createRoot(document.getElementById("root")).render(
-  <>
+  <ThemeProvider>
     <Toaster />
     <ProductFruits
       workspaceCode="yzIfXrJokARqNjWZ"
@@ -26,5 +27,5 @@ createRoot(document.getElementById("root")).render(
       user={userInfo}
     />
     <App />
-  </>
+  </ThemeProvider>
 );

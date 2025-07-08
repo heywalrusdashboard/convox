@@ -13,7 +13,7 @@
   });
 
   const widgetURL = `https://convox-pink.vercel.app/chat-widget?${params.toString()}`;
-  // const widgetURL = `http://localhost:5174/chat-widget?${params.toString()}`;
+  // const widgetURL = `http://localhost:5173/chat-widget?${params.toString()}`;
 
   const wrapper = document.createElement("div");
   wrapper.style.position = "fixed";
@@ -23,6 +23,7 @@
   wrapper.style.height = "725px";
   wrapper.style.display = "none";
   wrapper.style.zIndex = "9998";
+  wrapper.style.backgroundColor = "transparent"
 
   window.addEventListener("resize", () => {
     wrapper.style.width = window.innerWidth < 640 ? "90vw" : "370px";
@@ -33,7 +34,7 @@
   iframe.style.width = "100%";
   iframe.style.height = "100%";
   iframe.style.border = "none";
-  iframe.style.background = "transparent";
+  iframe.style.backgroundColor = "transparent";
 
   wrapper.appendChild(iframe);
   document.body.appendChild(wrapper);

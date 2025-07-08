@@ -18,6 +18,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/components/ui/ThemeContext";
+import { Moon, Sun } from "lucide-react";
 
 const Navbar = ({ title = "Dashboard - Your Companions at Work" }) => {
   const navigate = useNavigate();
@@ -71,10 +73,12 @@ const Navbar = ({ title = "Dashboard - Your Companions at Work" }) => {
   };
 
   return (
-    <header className="flex flex-wrap justify-between items-center gap-4 py-4 px-7 border-b bg-white">
+    <header className="flex flex-wrap justify-between items-center gap-4 py-4 px-7 border-b bg-white dark:bg-background dark:border-muted">
       <h1 className="text-lg font-medium">{title}</h1>
 
       <div className="flex items-center gap-4">
+        {/* Dark mode toggle */}
+        <ThemeToggle />
         <Menubar>
           <MenubarMenu>
             <MenubarTrigger>...</MenubarTrigger>
@@ -122,3 +126,16 @@ const Navbar = ({ title = "Dashboard - Your Companions at Work" }) => {
 };
 
 export default Navbar;
+
+const ThemeToggle = () => {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      className="rounded-full p-2 transition-colors bg-muted hover:bg-primary text-text dark:text-white focus:outline-none"
+      title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
+  );
+};
