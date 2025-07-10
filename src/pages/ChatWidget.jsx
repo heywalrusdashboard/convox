@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 const ChatWidget = () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -57,20 +58,6 @@ const ChatWidget = () => {
   const appendMessage = (from, text) => {
     setMessages((prev) => [...prev, { from, text }]);
   };
-
-  function renderFormattedMessage(message) {
-    const parts = message.split(/(\*\*[^*]+\*\*)/g);
-    return parts.map((part, i) => {
-      if (/^\*\*[^*]+\*\*$/.test(part)) {
-        return (
-          <strong key={i} className="font-bold">
-            {part.replace(/\*\*/g, "")}
-          </strong>
-        );
-      }
-      return <span key={i}>{part}</span>;
-    });
-  }
 
   const startChat = async () => {
     if (!userEmail || !acceptTerms) return;
@@ -214,7 +201,7 @@ const ChatWidget = () => {
                 } max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed`}
                 style={msg.from === "user" ? { backgroundColor: primaryColor } : {}}
               >
-                {renderFormattedMessage(msg.text)}
+                <ReactMarkdown>{msg.text}</ReactMarkdown>
               </div>
             ))}
             {icebreakers.length > 0 && (
