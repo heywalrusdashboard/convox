@@ -55,11 +55,7 @@ const Step1 = ({ form }) => {
         control={form.control}
         name="websiteURL"
         rules={{
-          required: "Website is required",
-          pattern: {
-            value: /^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}$/,
-            message: "Enter a valid URL",
-          },
+          required: "Website is required"
         }}
         render={({ field }) => (
           <FormItem>
