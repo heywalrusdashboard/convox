@@ -1,6 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Input } from "@/components/ui/input";
+import DataTable from "@/components/ui/data-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import Navbar from "@/components/layouts/Navbar";
 import {
   BarChart,
@@ -9,6 +18,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 import { useState } from "react";
 import Loader from "@/components/ui/loader";
@@ -17,11 +27,17 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useTheme } from "@/components/ui/ThemeContext";
 
 const DashboardPage = () => {
-  const [filter, setFilter] = useState("today");
+  const [filter, setFilter] = useState("this_week");
   const { data, loading } = useDashboardData();
   const { theme } = useTheme();
 
-  const { totalConversations, totalInteractions, totalUsers, userMessages, chartData } = data;
+  const {
+    totalConversations,
+    totalInteractions,
+    totalUsers,
+    userMessages,
+    chartData,
+  } = data;
 
   // Helper to filter messages by date
   const filterMessages = (messages) => {
@@ -32,7 +48,7 @@ const DashboardPage = () => {
     const yesterdayStr = yesterday.toISOString().slice(0, 10);
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - now.getDay() + 1); // Monday as start of week
-    weekStart.setHours(0,0,0,0);
+    weekStart.setHours(0, 0, 0, 0);
 
     return messages.filter((msg) => {
       const msgDate = new Date(msg.timestamp);
@@ -48,7 +64,8 @@ const DashboardPage = () => {
     });
   };
 
-  const filteredMessages = filterMessages(userMessages);
+  // Latest 10 conversations should always show (unfiltered)
+  const filteredMessages = userMessages;
 
   // Filter chart data as well
   const filteredChartData = chartData.filter((d) => {
@@ -60,18 +77,26 @@ const DashboardPage = () => {
     const yesterdayStr = yesterday.toISOString().slice(0, 10);
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - now.getDay() + 1);
-    weekStart.setHours(0,0,0,0);
+    weekStart.setHours(0, 0, 0, 0);
     if (filter === "today") {
       return d.name === todayStr;
     } else if (filter === "yesterday") {
       return d.name === yesterdayStr;
     } else if (filter === "this_week") {
       return dDate >= weekStart && dDate <= now;
+    } else if (filter === "all") {
+      return true;
     }
     return true;
   });
+  const chartToShow = filteredChartData.length ? filteredChartData : chartData;
 
-  if (loading) return <div className=" h-screen w-screen flex justify-center items-center"><Loader/></div>;
+  if (loading)
+    return (
+      <div className=" h-screen w-screen flex justify-center items-center">
+        <Loader />
+      </div>
+    );
 
   return (
     <div className="">
@@ -83,10 +108,32 @@ const DashboardPage = () => {
             type="single"
             value={filter}
             onValueChange={(val) => val && setFilter(val)}
+            className="rounded-lg border p-1 bg-muted/40 gap-1"
           >
-            <ToggleGroupItem value="today">Today</ToggleGroupItem>
-            <ToggleGroupItem value="yesterday">Yesterday</ToggleGroupItem>
-            <ToggleGroupItem value="this_week">This Week</ToggleGroupItem>
+            <ToggleGroupItem
+              value="today"
+              className="px-3 py-1.5 rounded-md data-[state=on]:bg-background data-[state=on]:shadow"
+            >
+              Today
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="yesterday"
+              className="px-3 py-1.5 rounded-md data-[state=on]:bg-background data-[state=on]:shadow"
+            >
+              Yesterday
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="this_week"
+              className="px-3 py-1.5 rounded-md data-[state=on]:bg-background data-[state=on]:shadow"
+            >
+              This Week
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="all"
+              className="px-3 py-1.5 rounded-md data-[state=on]:bg-background data-[state=on]:shadow"
+            >
+              All Time
+            </ToggleGroupItem>
           </ToggleGroup>
 
           <Input type="search" placeholder="Search..." className="w-48" />
@@ -95,19 +142,25 @@ const DashboardPage = () => {
         {/* Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
-            <CardHeader><CardTitle>Total Conversations</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Total Conversations</CardTitle>
+            </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{totalConversations}</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle>Total Interactions</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Total Interactions</CardTitle>
+            </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{totalInteractions}</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle>Users Identified</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Users Identified</CardTitle>
+            </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{totalUsers}</p>
             </CardContent>
@@ -118,44 +171,87 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Table */}
           <Card>
-            <CardHeader><CardTitle>Latest 10 Conversations</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Latest 10 Conversations</CardTitle>
+            </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-gray-500 border-b">
-                    <tr>
-                      <th className="py-2">User's Inquiry</th>
-                      <th>Date & Time</th>
-                      <th>Session ID</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <div className="max-h-[360px] overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User's Inquiry</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>Session ID</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {filteredMessages.map((msg, i) => (
-                      <tr key={i} className="border-b">
-                        <td className="py-2">{msg.user_msg}</td>
-                        <td>{msg.timestamp}</td>
-                        <td>{msg.session_id}</td>
-                      </tr>
+                      <TableRow key={i}>
+                        <TableCell className="whitespace-normal break-words">
+                          {msg.user_msg}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {msg.timestamp}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {msg.session_id}
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
 
           {/* Chart */}
           <Card>
-            <CardHeader><CardTitle>Conversations Trend</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Conversations Trend</CardTitle>
+            </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={filteredChartData}>
-                  <XAxis dataKey="name" stroke="var(--color-foreground)" />
-                  <YAxis stroke="var(--color-foreground)" />
-                  <Tooltip
-                    contentStyle={{ background: 'var(--color-popover)', color: 'var(--color-popover-foreground)', border: '1px solid var(--color-border)' }}
-                    cursor={{ fill: 'var(--color-muted)' }}
+              <ResponsiveContainer width="100%" height={320}>
+                <BarChart data={chartToShow}>
+                  <defs>
+                    <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="0%"
+                        stopColor={theme === "dark" ? "#8884d8" : "#111827"}
+                        stopOpacity={0.9}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor={theme === "dark" ? "#8884d8" : "#111827"}
+                        stopOpacity={0.3}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--color-border)"
                   />
-                  <Bar dataKey="value" fill={theme === 'dark' ? '#fff' : '#000'} radius={[4, 4, 0, 0]} />
+                  <XAxis
+                    dataKey="name"
+                    stroke="var(--color-foreground)"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    stroke="var(--color-foreground)"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--color-popover)",
+                      color: "var(--color-popover-foreground)",
+                      border: "1px solid var(--color-border)",
+                    }}
+                    cursor={{ fill: "var(--color-muted)" }}
+                  />
+                  <Bar
+                    dataKey="value"
+                    fill="url(#barFill)"
+                    radius={[6, 6, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
